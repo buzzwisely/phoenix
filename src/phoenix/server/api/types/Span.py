@@ -736,8 +736,15 @@ class Span(Node):
                     "annotator_kind": annotation.annotator_kind,
                 }
             )
-        # Merge annotations into the metadata
+        # Merge span metadata + annotations into the dataset example metadata
+        span_metadata = span.attributes.get("metadata")
+        if isinstance(span_metadata, str):
+            try:
+                span_metadata = json.loads(span_metadata)
+            except (json.JSONDecodeError, TypeError):
+                span_metadata = None
         metadata = {
+            **(span_metadata if isinstance(span_metadata, dict) else {}),
             "span_kind": span.span_kind,
             **({"annotations": annotations} if annotations else {}),
         }
